@@ -45,27 +45,6 @@ def is_syllable(syllable:str) -> None:
 def seperate_vowels_consonants(word:str) -> str:
     pass
 
-def syllabify_token(string: str) -> None:
-    for char in string:
-        # take index of this character
-        char_position= string.index(char)
-        # for each consonant in the word
-        if char in consonants:
-            # if consonant is not in the beginning or ending of the string
-            if char_position > 0 and char_position < (len(string)-1):
-                # look before and after the consonants to see if it is surrounded by vowels
-                if string[char_position-1] in vowels and string[char_position+1] in vowels:
-                    #seperate before consonant and renew string
-                    string = string[: char_position] + " " + string[char_position:]
-
-                # look if before it there is a vowel and after it there is another consonant
-                elif string[char_position-1] in vowels and string[char_position+1] in consonants:
-                    string = string[: char_position] + " " + string[char_position:]
-
-
-        else:
-            continue
-
 
 def syllabify_token_while(string: str) -> None:
     index_char = 0
