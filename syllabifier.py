@@ -4,7 +4,7 @@
 
 # create lists
 # TODO add uppercase
-vowels = ["α", "ε", "η", "ι", "ο", "ω", "υ", "ά", "έ", "ή", "ί", "ό", "ώ", "ύ", "ϊ", "ϋ"]
+vowels = ["α", "ε", "η", "ι", "ο", "ω", "υ", "ά", "έ", "ή", "ί", "ό", "ώ", "ύ", "ϊ", "ϋ", "ΐ", "ΰ"]
 
 consonants = ["β", "γ", "δ", "ζ", "θ", "κ", "λ", "μ", "ν", "ξ", "π", "ρ", "σ", "τ", "φ", "χ", "ψ", "ς", "μπ", "ντ",
               "γκ", "τσ", "τζ"]
@@ -16,10 +16,10 @@ cons_tuples_start_greek = ["βγ", "βδ", "βλ", "βρ", "γδ", "γκ", "γλ
 
 diphthongs = ["αι", "ει", "οι", "ου", "υι", "αυ", "ευ", "ια", "ιε", "ιο", "ιω", "υα", "υο", "υω", "αί", "εί", "οί",
               "ού", "υί", "αύ", "εύ", "ιά", "ιέ", "ιό", "ιώ", "υά", "υό", "υώ", "αη", "όη", "αϊ", "οϊ", "εια", "ειε",
-              "ειο", "ειου", "ειώ", "ιου", "οια", "οιε", "οιο", "οιου"]
+              "ειο", "ειου", "ειώ", "ιου", "οια", "οιε", "οιο", "οιου", "ιοι"]
 
 
-def is_monosyllable(string: str) -> None:
+def is_monosyllable(string: str) -> bool:
     counter = 0
     index_char = 0
     while index_char <= len(string) - 1:
@@ -53,13 +53,12 @@ def is_monosyllable(string: str) -> None:
             index_char += 1
 
     if counter == 1:
-        print("The word is monosyllable")
+        return True
     else:
-        print("The word is polysyllable")
+        return False
 
 
-
-def syllabify_token_while(string: str) -> None:
+def syllabify_token_while(string: str) -> str:
     index_char = 0
 
     while index_char < len(string) - 1:
@@ -106,21 +105,4 @@ def syllabify_token_while(string: str) -> None:
             else:
                 index_char += 1
 
-    print(string)
-
-
-is_monosyllable("ματς")
-is_monosyllable("φλερτ")
-is_monosyllable("φλερτάρω")
-is_monosyllable("μπλουζ")
-is_monosyllable("αεροπλάνο")
-is_monosyllable("γκριλ")
-is_monosyllable("μπλούζα")
-is_monosyllable("πα")
-is_monosyllable("ποιος")
-is_monosyllable("δυό")
-
-#syllabify_token_while("ποιότητα")
-syllabify_token_while("σχολειού")
-
-
+    return string
