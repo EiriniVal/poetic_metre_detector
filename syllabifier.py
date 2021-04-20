@@ -1,10 +1,10 @@
 # Program that syllabifies a greek word
 # Author: Eirini Valkana
-
+import re
 
 # create lists
 # TODO add uppercase
-vowels = ["α", "ε", "η", "ι", "ο", "ω", "υ", "ά", "έ", "ή", "ί", "ό", "ώ", "ύ", "ϊ", "ϋ", "ΐ", "ΰ"]
+vowels = ("α", "ε", "η", "ι", "ο", "ω", "υ", "ά", "έ", "ή", "ί", "ό", "ώ", "ύ", "ϊ", "ϋ", "ΐ", "ΰ")
 
 consonants = ["β", "γ", "δ", "ζ", "θ", "κ", "λ", "μ", "ν", "ξ", "π", "ρ", "σ", "τ", "φ", "χ", "ψ", "ς", "μπ", "ντ",
               "γκ", "τσ", "τζ"]
@@ -58,7 +58,7 @@ def is_monosyllable(string: str) -> bool:
         return False
 
 
-def syllabify_token_while(string: str) -> str:
+def syllabify_token(string: str) -> str:
     index_char = 0
 
     while index_char < len(string) - 1:
@@ -104,5 +104,16 @@ def syllabify_token_while(string: str) -> str:
             # if vowel is followed by a consonant
             else:
                 index_char += 1
-
     return string
+
+
+def syllabify_verse(verse: str) -> list:
+    # split verse into tokens and do syllabification, token-wise
+    syllables_list = []
+    for token in verse.lower().split(" "):
+        syllables_list.append(syllabify_token(token) if is_monosyllable(token) is False else token)
+    string_verse = " ".join(syllables_list)
+    syllables_list = re.split(r"\s", string_verse)
+    syllables_list = list(filter(None, syllables_list))
+    return syllables_list
+
