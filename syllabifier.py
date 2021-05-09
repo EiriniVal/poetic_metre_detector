@@ -20,6 +20,11 @@ diphthongs = ["αι", "ει", "οι", "ου", "υι", "αυ", "ευ", "ια", "�
 
 
 def is_monosyllable(string: str) -> bool:
+    """
+    Function that returns True if string is a monosyllable word.
+    :param string: string to be checked
+    :return: True if string is syllable, otherwise False
+    """
     counter = 0
     index_char = 0
     while index_char <= len(string) - 1:
@@ -59,6 +64,11 @@ def is_monosyllable(string: str) -> bool:
 
 
 def syllabify_token(string: str) -> str:
+    """
+    Function that does the syllabification token-wise.
+    :param string: token to be syllabified
+    :return: token with syllables seperated by space
+    """
     index_char = 0
 
     while index_char < len(string) - 1:
@@ -108,6 +118,11 @@ def syllabify_token(string: str) -> str:
 
 
 def syllabify_verse(verse: str) -> list:
+    """
+    Function that does the syllabification verse-wise.
+    :param verse: the verse of the poem we want to syllabify
+    :return: a list consisting of the syllables of the verse
+    """
     # split verse into tokens and do syllabification, token-wise
     syllables_list = []
     for token in verse.lower().split(" "):
