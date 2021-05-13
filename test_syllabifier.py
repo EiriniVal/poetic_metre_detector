@@ -55,11 +55,12 @@ class TestSyllabification(TestCase):
         self.assertIsInstance(syl.syllabify_verse("σε γνωρίζω από την κόψη"), list, "Required output type is list!")
 
     def test_syllabify_verse(self):
-        self.assertEqual(syl.syllabify_verse("από αγάλματα και εικόνες"),
-                         ["α", "πό", "α", "γάλ", "μα", "τα", "και", "ει", "κό", "νες"], "Splitting was wrong")
-        self.assertEqual(syl.syllabify_verse("σε γνωρίζω από την κόψη"),
-                         ["σε", "γνω", "ρί", "ζω", "α", "πό", "την", "κό", "ψη"], "Splitting was wrong")
-        self.assertEqual(syl.syllabify_verse("Την είδα την Ξανθούλα,"),
-                         ["την", "εί", "δα", "την", "ξαν", "θού", "λα,"], "Splitting was wrong")
+        with open('verses_test_syllabification.txt', 'r', encoding='utf-8') as f:
+            for index, line in enumerate(f):
+                if index % 2 == 0:
+                    syllables_list = f.readline().strip().split()
+                    self.assertEqual(syl.syllabify_verse(line), syllables_list, "Splitting was wrong")
+                else:
+                    continue
         self.assertNotIn("", syl.syllabify_verse("Την είδα την Ξανθούλα,"), "Empty strings are not supposed to be in "
                                                                             "the list")

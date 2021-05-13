@@ -3,7 +3,7 @@ import operator
 from collections import Counter
 
 unstressed_vowels = ("α", "ε", "η", "ι", "ο", "ω", "υ")
-from syllabifier import syllabify_verse
+from syllabifier import syllabify_verse, vowels
 
 
 def adjust_syllables_for_metre_detection(syllables_list: list) -> list:
@@ -30,7 +30,11 @@ def adjust_syllables_for_metre_detection(syllables_list: list) -> list:
     # handle cases were there is no vowel in syllable/token due to idioms/dialects
     for index, token in enumerate(syllables_list):
         if re.search(r"[αεηιοωυάέήίόώύϊϋΐΰ]", token) is None:
-            syllables_list[index: index + 2] = ["".join(syllables_list[index: index + 2])]
+            if syllables_list[index + 1].startswith(vowels):
+                syllables_list[index: index + 2] = ["".join(syllables_list[index: index + 2])]
+            else:
+                # if next syllable does not start with a vowel, merge it with the previous one
+                syllables_list[index: index - 2] = ["".join(syllables_list[index: index - 2])]
         else:
             continue
     return syllables_list
@@ -63,13 +67,7 @@ def detect_stress(syllables_list: list) -> list:
     return metre_list
 
 
-#detect_stress(adjust_syllables_for_metre_detection(syllabify_verse("Αχός βαρύς ακούγεται πολλά ντουφέκια πέφτουν")))
-#detect_stress(adjust_syllables_for_metre_detection(syllabify_verse("Σε γνωρίζω από την κόψη")))
-#detect_stress(adjust_syllables_for_metre_detection(syllabify_verse("Στων Ψαρών την ολόμαυρη ράχη")))
-#detect_stress(adjust_syllables_for_metre_detection(syllabify_verse("Ξύπνα δροσιά της αυγής και φεγγάρι")))
-#detect_stress(adjust_syllables_for_metre_detection(syllabify_verse("Τα πρώτα μου χρόνια τ' αξέχαστα τα 'ζησα")))
-
-def detect_verse_metre(stress_list: list) -> dict:
+def detect_verse_metre(stress_list: list) -> tuple:
     """
     Function that takes as input a list consisting of a sequence of "s" (stressed) and "u" (unstressed) elements, which
     correspond to the syllables of a verse, computes the scores for each metre in Modern Greek, and returns them in a
@@ -81,7 +79,8 @@ def detect_verse_metre(stress_list: list) -> dict:
     have normalized and comparable results between the metres whose pattern is disyllabic and those whose pattern is
     trisyllabic.
     :param stress_list: a list consisting of a sequence of "s" and "u"
-    :return: dict with the names of the metres as keys and the scores as values
+    :return: tuple consisting of a dict with the names of the metres as keys and the scores as values, and a string
+    which is the metre with the highest score
     """
     # create a list with pairs to check for iambic and trochaic
     tuple_list = [x for x in zip(*[iter(stress_list)] * 2)]
@@ -90,19 +89,20 @@ def detect_verse_metre(stress_list: list) -> dict:
     iambic_counts = tuple_list.count(('u', 's')) / total_tuples
     trochaic_counts = tuple_list.count(('s', 'u')) / total_tuples
 
-    # create a list with triples to check for anapest, messotonos, dactyl
+    # create a list with triples to check for anapaest, messotonos, dactyl
     triple_list = [x for x in zip(*[iter(stress_list)] * 3)]
     # count how many triples our list has in order to normalize the score
     total_triples = len(triple_list)
-    anapest_counts = triple_list.count(('u', 'u', 's')) / total_triples
+    anapaest_counts = triple_list.count(('u', 'u', 's')) / total_triples
     dactyl_counts = triple_list.count(('s', 'u', 'u')) / total_triples
     messotonos_counts = triple_list.count(('u', 's', 'u')) / total_triples
-    metre_scores_dict = {"iambic": iambic_counts, "trochaic": trochaic_counts, "anapest": anapest_counts,
+    metre_scores_dict = {"iambic": iambic_counts, "trochaic": trochaic_counts, "anapaest": anapaest_counts,
                          "dactyl": dactyl_counts, "messotonos": messotonos_counts}
-    # print(f"iambic: {iambic_counts}\ntrochaic: {trochaic_counts}\nanapest: {anapest_counts}\ndactyl: {
+    # print(f"iambic: {iambic_counts}\ntrochaic: {trochaic_counts}\nanapaest: {anapaest_counts}\ndactyl: {
     # dactyl_counts}\nmessotonos: {messotonos_counts}")
     #print(f"Metre detected for verse: {metre_detected}")
-    return metre_scores_dict
+    metre_detected = max(metre_scores_dict.items(), key=operator.itemgetter(1))[0]
+    return metre_scores_dict, metre_detected
 
 
 def detect_poem_metre(poem_filename: str):

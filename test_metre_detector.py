@@ -1,4 +1,7 @@
 import metre_detector as met
+import syllabifier as syl
+import os
+import re
 from unittest import TestCase
 
 class TestMetreDetection(TestCase):
@@ -12,6 +15,8 @@ class TestMetreDetection(TestCase):
                          ["την", "εί", "δα", "την", "ξαν", "θού", "λα,"], "Splitting was wrong")
         self.assertNotIn("", met.adjust_syllables_for_metre_detection(met.syllabify_verse("Την είδα την Ξανθούλα,")),
                          "Empty strings are not allowed in the list")
+        self.assertEqual(met.adjust_syllables_for_metre_detection(met.syllabify_verse("Παιδιά μ’ σαν θέλτε λεβεντιά")),
+                         ["Παι", "διάμ'", "σαν", "θέλ", "τε", "λε", "βε", "ντιά"], "Splitting was wrong")
 
     def test_is_stressed(self):
         self.assertEqual(met.is_stressed("α"), False, "Syllable was recognized as stressed even though it is unstressed")
@@ -26,6 +31,20 @@ class TestMetreDetection(TestCase):
                                                                              "stress list")
         self.assertNotIn("", met.detect_stress(["την", "εί", "δα", "την", "ξαν", "θού", "λα,"]),
                          "Empty strings are not allowed in the list")
+
+
+    def test_detect_verse_metre(self):
+        directory = r'verses_test_metre'
+        for filename in os.listdir(directory):
+            path = os.path.join(directory, filename)
+            name = filename.replace("_verses.txt", "")
+            print(name)
+            with open(path, 'r', encoding='utf-8') as f:
+                for line in f:
+                    print(line)
+                    syllables = met.detect_stress(met.adjust_syllables_for_metre_detection(syl.syllabify_verse(line)))
+                    self.assertEqual(met.detect_verse_metre(syllables)[1], name, "The metre detected is wrong")
+
 
 
 
