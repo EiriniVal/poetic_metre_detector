@@ -1,6 +1,7 @@
 import re
 import operator
 from collections import Counter
+from itertools import islice
 
 unstressed_vowels = ("α", "ε", "η", "ι", "ο", "ω", "υ")
 from syllabifier import syllabify_verse, vowels
@@ -67,6 +68,11 @@ def detect_stress(syllables_list: list) -> list:
     return metre_list
 
 
+def chunk(it, size):
+    it = iter(it)
+    return iter(lambda: tuple(islice(it, size)), ())
+
+
 def detect_verse_metre(stress_list: list) -> tuple:
     """
     Function that takes as input a list consisting of a sequence of "s" (stressed) and "u" (unstressed) elements, which
@@ -83,19 +89,19 @@ def detect_verse_metre(stress_list: list) -> tuple:
     which is the metre with the highest score
     """
     # create a list with pairs to check for iambic and trochaic
-    tuple_list = [x for x in zip(*[iter(stress_list)] * 2)]
-    # count how many triples our list has in order to normalize the score
+    tuple_list = list(chunk(stress_list, 2))
+    # count how many triads our list has in order to normalize the score
     total_tuples = len(tuple_list)
     iambic_counts = tuple_list.count(('u', 's')) / total_tuples
     trochaic_counts = tuple_list.count(('s', 'u')) / total_tuples
 
-    # create a list with triples to check for anapaest, messotonos, dactyl
-    triple_list = [x for x in zip(*[iter(stress_list)] * 3)]
-    # count how many triples our list has in order to normalize the score
-    total_triples = len(triple_list)
-    anapaest_counts = triple_list.count(('u', 'u', 's')) / total_triples
-    dactyl_counts = triple_list.count(('s', 'u', 'u')) / total_triples
-    messotonos_counts = triple_list.count(('u', 's', 'u')) / total_triples
+    # create a list with triads to check for anapaest, messotonos, dactyl
+    triad_list = list(chunk(stress_list, 3))
+    # count how many triads our list has in order to normalize the score
+    total_triads = len(triad_list)
+    anapaest_counts = triad_list.count(('u', 'u', 's')) / total_triads
+    dactyl_counts = triad_list.count(('s', 'u', 'u')) / total_triads
+    messotonos_counts = triad_list.count(('u', 's', 'u')) / total_triads
     metre_scores_dict = {"iambic": iambic_counts, "trochaic": trochaic_counts, "anapaest": anapaest_counts,
                          "dactyl": dactyl_counts, "messotonos": messotonos_counts}
     # print(f"iambic: {iambic_counts}\ntrochaic: {trochaic_counts}\nanapaest: {anapaest_counts}\ndactyl: {
