@@ -1,25 +1,24 @@
 import re
 import operator
-from collections import Counter
 from itertools import islice
+from syllabifier import syllabify_verse, vowels
 
 unstressed_vowels = ("α", "ε", "η", "ι", "ο", "ω", "υ")
-from syllabifier import syllabify_verse, vowels
 
 
 def adjust_syllables_for_metre_detection(syllables_list: list) -> list:
     """
-    Function that takes as input a list of syllables and processes them to detect and handle cases of;
+    Function that takes as input a list of syllables and processes them to detect and handle cases of:
     i) synizesis (note: only for the case when a syllable ends with an unstressed vowel and the following syllable
-    starts with an unstressed vowel. stressed vowels were not included here because the metre detection will be based on
-    them. Since, synizesis is not that common on stressed vowels, it was not worth the risk using it and having altered
-    results.)
+    starts with an unstressed vowel. Synizesis with stressed vowels is not that common and is excluded in the current
+    implementation. The metre detection is strictly based on the stress, and including synizesis with stressed vowels
+    would frequently create less accurate metric patterns.)
     ii) cases where a monosyllable word is in the list and does not consist of a vowel (due to idioms/dialect forms)
-    e.g. "τσ" instead of "της". In this case, the monosyllable word is merged with the following syllable which starts
-    with a vowel because in the verse they are pronounced as one. For example, if the function takes as input the list
-    ["τσ","αυ","γής], it will return the list ["τσαυ","γής"].
+    e.g. "τσ" instead of "της". In this case, the monosyllable word "τσ" is merged with the following syllable, which
+    starts with a vowel, because in the verse they are pronounced as one. For example, if the function takes as input
+    the list ["τσ","αυ","γής], it will return the list ["τσαυ","γής"].
     :param syllables_list: a list consisting of the syllables of a verse
-    :return: a list where syllables are changed if any of the cases mentioned above are present in the verse
+    :return: a list where syllables are changed if any of the cases mentioned above is present in the verse
     """
     # prepare syllables for metre detection
     # handle synizesis if it exists in the verse
@@ -69,6 +68,12 @@ def detect_stress(syllables_list: list) -> list:
 
 
 def chunk(it, size):
+    """
+    Function that separates an iterable into tuples of given size
+    :param it: iterable
+    :param size: size of tuples
+    :return: callable iterator
+    """
     it = iter(it)
     return iter(lambda: tuple(islice(it, size)), ())
 
@@ -104,34 +109,24 @@ def detect_verse_metre(stress_list: list) -> tuple:
     messotonos_counts = triad_list.count(('u', 's', 'u')) / total_triads
     metre_scores_dict = {"iambic": iambic_counts, "trochaic": trochaic_counts, "anapaest": anapaest_counts,
                          "dactyl": dactyl_counts, "messotonos": messotonos_counts}
-    # print(f"iambic: {iambic_counts}\ntrochaic: {trochaic_counts}\nanapaest: {anapaest_counts}\ndactyl: {
-    # dactyl_counts}\nmessotonos: {messotonos_counts}")
-    #print(f"Metre detected for verse: {metre_detected}")
     metre_detected = max(metre_scores_dict.items(), key=operator.itemgetter(1))[0]
     return metre_scores_dict, metre_detected
 
 
-def detect_poem_metre(poem_filename: str):
+def analyze_poem(poem_filename: str):
     """
-    Function that takes as input a (Modern) Greek poem in text file and returns:
-    i) the metres scores per verse
-    ii) the metre chosen per verse
-    iii) the poem's metre
+    Function that takes as input a (Modern) Greek poem in text file and yields:
+    i) each verse
+    ii) the number of the verse
+    iii) the metre scores for each verse
+    iv) each verse's metre
     :param poem_filename: the text file containing a single poem
     """
-    metre_verse_list = []
     counter = 1
     with open(poem_filename, "r", encoding="utf8") as f:
         for line in f:
             stress_list = detect_stress(adjust_syllables_for_metre_detection(syllabify_verse(line)))
-            #print(line)
-            d = detect_verse_metre(stress_list)
-            metre_detected = max(d.items(), key=operator.itemgetter(1))[0]
-            metre_verse_list.append(metre_detected)
-            print(f"Metre scores for verse {counter}: {d} ")
-            print(f"Metre detected for verse {counter}: {metre_detected}")
+            d = detect_verse_metre(stress_list)[0]
+            metre_detected_verse = max(d.items(), key=operator.itemgetter(1))[0]
+            yield line, counter, d, metre_detected_verse
             counter += 1
-        poem_metre = Counter(metre_verse_list).most_common(1)[0][0]
-        print(f"The poem's metre is: {poem_metre}")
-        return poem_metre
-

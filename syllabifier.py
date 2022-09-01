@@ -1,9 +1,5 @@
-# Program that syllabifies a greek word
-# Author: Eirini Valkana
 import re
 
-# create lists
-# TODO add uppercase
 vowels = ("α", "ε", "η", "ι", "ο", "ω", "υ", "ά", "έ", "ή", "ί", "ό", "ώ", "ύ", "ϊ", "ϋ", "ΐ", "ΰ")
 
 consonants = ["β", "γ", "δ", "ζ", "θ", "κ", "λ", "μ", "ν", "ξ", "π", "ρ", "σ", "τ", "φ", "χ", "ψ", "ς", "μπ", "ντ",
@@ -23,7 +19,7 @@ def is_monosyllable(string: str) -> bool:
     """
     Function that returns True if string is a monosyllable word.
     :param string: string to be checked
-    :return: True if string is syllable, otherwise False
+    :return: True if string is monosyllable, otherwise False
     """
     counter = 0
     index_char = 0
@@ -67,17 +63,14 @@ def syllabify_token(string: str) -> str:
     """
     Function that does the syllabification token-wise.
     :param string: token to be syllabified
-    :return: token with syllables seperated by space
+    :return: token with syllables separated by space
     """
     index_char = 0
 
     while index_char < len(string) - 1:
-        # print(index_char)
-        # take index of this character
         char = string[index_char]
-        # Consonants
         if char in consonants:
-            # if consonant is not in the beginning or ending of the string
+            # if consonant is not in the beginning or end of the string
             if index_char > 0:
                 # 1) look before and after the consonants to see if it is surrounded by vowels φτά/νω
                 if string[index_char - 1] in vowels and string[index_char + 1] in vowels:
@@ -86,10 +79,10 @@ def syllabify_token(string: str) -> str:
                     index_char += 1
                 # 2) look if before it there is a vowel and after it there is another consonant
                 elif string[index_char - 1] in vowels and string[index_char + 1] in consonants:
-                    # if greek words start with this combination, don't separate them (e.g. μ+π)
+                    # if greek words start with this combination, don't split them
                     if string[index_char] + string[index_char + 1] in cons_tuples_start_greek:
                         string = string[: index_char] + " " + string[index_char:]
-                    # if no greek word start with this combination separate them λ+τ or σ+σ
+                    # if no greek word start with this combination, split them
                     else:
                         string = string[: index_char + 1] + " " + string[index_char + 1:]
                     index_char += 1
@@ -99,7 +92,6 @@ def syllabify_token(string: str) -> str:
             # we need it in order in order to move from char at position 0 to the next one
             else:
                 index_char += 1
-        # Vowels
         else:
             # if vowel is followed by another vowel
             if string[index_char] in vowels and string[index_char + 1] in vowels:
@@ -108,7 +100,7 @@ def syllabify_token(string: str) -> str:
                     index_char += 1
                 # if they do not form a diphthong
                 else:
-                    # separate them
+                    # split them
                     string = string[: index_char + 1] + " " + string[index_char + 1:]
                     index_char += 1
             # if vowel is followed by a consonant
@@ -123,7 +115,6 @@ def syllabify_verse(verse: str) -> list:
     :param verse: the verse of the poem we want to syllabify
     :return: a list consisting of the syllables of the verse
     """
-    # split verse into tokens and do syllabification, token-wise
     syllables_list = []
     for token in verse.lower().split(" "):
         syllables_list.append(syllabify_token(token) if is_monosyllable(token) is False else token)
@@ -131,4 +122,3 @@ def syllabify_verse(verse: str) -> list:
     syllables_list = re.split(r"\s", string_verse)
     syllables_list = list(filter(None, syllables_list))
     return syllables_list
-
