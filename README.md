@@ -1,3 +1,4 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 # MODERN GREEK SYLLABIFICATION AND METRE DETECTION
 
 ## Author
